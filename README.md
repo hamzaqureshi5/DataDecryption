@@ -1,0 +1,1 @@
+# STC-logger-decrypt-v5
