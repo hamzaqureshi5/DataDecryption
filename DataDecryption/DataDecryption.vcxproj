@@ -148,14 +148,14 @@
   <ItemGroup>
     <ClInclude Include="aes_enc_dec.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="ini_parser.h" />
+    <ClInclude Include="config_parser.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="DataDecryption.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="ini_parser.cpp" />
+    <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ini_parser.h"
+#include "config_parser.h"
 
 /*
 --   ----------------------------------------------------------------------
