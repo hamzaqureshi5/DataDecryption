@@ -1,0 +1,21 @@
+﻿  pch.cpp
+  dllmain.cpp
+  stc.cpp
+C:\Users\hamza.qureshi\Desktop\console\STC\STC\stc.cpp(3,1): warning C4603: 'DEBUG': macro is not defined or definition is different after precompiled header use
+C:\Users\hamza.qureshi\Desktop\console\STC\STC\stc.cpp(3,1): message : Add macro to precompiled header instead of defining here
+C:\Users\hamza.qureshi\Desktop\console\STC\STC\stc.cpp(7,1): message : use of precompiled header
+C:\Users\hamza.qureshi\Desktop\console\STC\STC\stc.h(39,99): warning C4190: 'call_encryption_api' has C-linkage specified, but returns UDT 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' which is incompatible with C
+C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.37.32822\include\xstring(5119,29): message : see declaration of 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'
+C:\Users\hamza.qureshi\Desktop\console\STC\STC\stc.h(41,62): warning C4190: 'test_api_call_encryption_api' has C-linkage specified, but returns UDT 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' which is incompatible with C
+C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.37.32822\include\xstring(5119,29): message : see declaration of 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'
+C:\Users\hamza.qureshi\Desktop\console\STC\STC\stc.h(43,95): warning C4190: 'decrypt_each_record' has C-linkage specified, but returns UDT 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' which is incompatible with C
+C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.37.32822\include\xstring(5119,29): message : see declaration of 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'
+     Creating library C:\Users\hamza.qureshi\Desktop\console\STC\x64\Release\STC.lib and object C:\Users\hamza.qureshi\Desktop\console\STC\x64\Release\STC.exp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+C:\Users\hamza.qureshi\Desktop\console\STC\STC\stc.cpp(247): warning C4715: 'extract_from_json': not all control paths return a value
+  All 1377 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  STC.vcxproj -> C:\Users\hamza.qureshi\Desktop\console\STC\x64\Release\STC.dll
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

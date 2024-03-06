@@ -1,0 +1,6 @@
+C:\Users\hamza.qureshi\Desktop\console\piotec\STC-logger-decrypt - v1\STC\Release\STC.vcxproj.CopyComplete
+C:\Users\hamza.qureshi\Desktop\console\piotec\STC-logger-decrypt - v2\STC\Release\STC.vcxproj.CopyComplete
+C:\Users\hamza.qureshi\Desktop\console\piotec\STC-logger-decrypt - v3\STC\Release\STC.vcxproj.CopyComplete
+D:\console\piotec\STC-logger-decrypt - v3\STC\Release\STC.vcxproj.CopyComplete
+D:\console\piotec\STC-logger-decrypt - v4\STC\Release\STC.vcxproj.CopyComplete
+D:\console\piotec\STC-logger-decrypt - v4 - Copy\STC\Release\STC.vcxproj.CopyComplete

@@ -1,0 +1,477 @@
+//#pragma warning(suppress : 4996)
+/*
+--   ----------------------------------------------------------------------
+--   Project:          DLL creation
+--
+--   Author:           Hamza Qureshi
+--
+--   File name:        DataDecryption.h
+--
+--   Rev.:             1.0
+--   Creation date:    DEC 2023
+--
+--   ---------------------------------------------------------------------
+Purpose of this module: MAIN MODULE
+
+----------Main body--------------
+
+Comments:
+
+WARININGS
+
+---------------------------------------------------------------------------
+*/
+// DataDecryption.cpp : implementation file
+//
+
+//#define DEBUG
+#undef DEBUG
+
+
+
+#include "pch.h"
+#include <limits.h>
+#include "DataDecryption.h"
+#include "string"
+#include "framework.h"
+#include <iostream>
+#include <curl/curl.h>
+#include <conio.h>
+#include <nlohmann/json.hpp>
+#include <utility>
+#include <fstream>
+#include <codecvt>
+#include <cstdarg>
+#include "aes_enc_dec.h"
+#include "ini_parser.h"
+#include <iostream>
+#include <sstream>
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
+#include <fstream>
+#include<windows.h>
+//#include "AESEncDec.h"  // Assuming you have a header file for AES encryption/decryption
+
+#define NEW_LINE "\n"
+
+
+using json = nlohmann::json;
+
+
+
+// DLL internal state variables:
+static unsigned long long previous_;  // Previous value, if any
+static unsigned long long current_;   // Current sequence value
+static unsigned index_;               // Current seq. position
+
+static std::string buffer_table_name_;
+//static std::string previous_table_name_;
+static std::string encrption_key_;
+
+
+// Function declarations 
+std::string read_api_endpoint();
+std::string api_call_post_method(const char* url, const char* table_name, const char* iccid_name);
+//std::string extract_from_json(std::string parse_string_json);
+std::string extract_from_json(const std::string& parse_string_json);
+std::string read_api_active();
+
+
+#define API_ENDPOINT "http://127.0.0.1:5555/encryption_key"
+
+
+// Callback function to handle the response
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output)
+{
+	size_t totalSize = size * nmemb;
+	output->append(static_cast<char*>(contents), totalSize);
+	return totalSize;
+}
+
+std::string api_call_post_method(const char* url, const char* table_name, const char* iccid_name)
+{
+	struct curl_slist* slist1;
+
+	slist1 = NULL;
+	slist1 = curl_slist_append(slist1, "Content-Type: application/json");
+
+	nlohmann::json jsonData;
+	jsonData["accessToken"] = "9AD202FC-FCD1-4E16-A11F-592356F9B7C31";
+	jsonData["tableName"] = table_name;
+	jsonData["pcId"] = "PC-1";
+	jsonData["macAddress"] = "12345";
+
+	// Convert the JSON object to a string
+	std::string jsonString = jsonData.dump();
+	// Initialize cURL
+	CURL* curl = curl_easy_init();
+	if (!curl)
+	{
+		std::cerr << "Error initializing cURL." << std::endl;
+		return "Error";
+	}
+
+	json m_handle;
+	// Set the API endpoint URL
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	// Set the HTTP method to POST
+	curl_easy_setopt(curl, CURLOPT_POST, 1L);
+
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
+
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonString.c_str());
+
+	// Set the callback function to handle the response
+	std::string responseData;
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+	// Perform the HTTP request
+	CURLcode res = curl_easy_perform(curl);
+
+	// Check for errors
+	if (res != CURLE_OK)
+	{
+
+		std::wstring errorMessage = L"Server access failed. API POST FUNCTION ERROR: CURLE_OK NOT FOUND!\n";
+		MessageBox(NULL, errorMessage.c_str(), L"STC API Server Error", NULL);
+		std::cerr << "cURL request failed: " << curl_easy_strerror(res) << std::endl;
+	}
+	else
+	{
+		// Get HTTP response code
+		long response_code;
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
+		// Check if the response code is in the 2xx range (indicating success)
+		if (response_code >= 200 && response_code < 300)
+		{
+#ifdef DEBUG
+			std::cout << "Data send is " << jsonData << "\n";
+			std::cout << "Response: " << responseData << std::endl;
+#endif
+			curl_easy_cleanup(curl);
+			return responseData;
+		}
+		else
+		{
+			std::cerr << "HTTP request failed with response code: " << response_code << std::endl;
+			std::wstring errorMsg = L"Server access failed \"API POST FUNCTION ERROR\" returned RESP: " + std::to_wstring(response_code);
+			MessageBox(NULL, (LPCWSTR)errorMsg.c_str(), L"STC API Response Error", NULL);
+
+
+			curl_easy_cleanup(curl);
+			return "ERROR";
+
+		}
+		return "ERROR";
+	}
+	// Cleanup cURL
+	return "ERROR";
+
+}
+
+
+
+std::string extract_from_json(const std::string& parse_string_json)
+{
+	try
+	{
+		// Parse the JSON string
+		json responseData = json::parse(parse_string_json);
+
+		// Extract values
+		std::string key = responseData.value("aesKey", ""); // Using value() to avoid exception if key is not found
+		std::cout << "RESP: " << responseData << std::endl;
+
+#ifdef DEBUG
+		// Displaying additional debug information
+		std::cout << "Key: " << key << std::endl;
+#endif // DEBUG
+		return (std::size(key) != 0) ? key : "";
+
+	}
+
+	catch (const json::parse_error& e)
+	{
+		std::cerr << "JSON parsing error: " << e.what() << std::endl;
+
+		// Convert the JSON string to a wide string for display in MessageBox
+		std::wstring errorMsg = L"JSON Parsing failed\nJSON returned is: " + std::wstring(parse_string_json.begin(), parse_string_json.end());
+		MessageBox(NULL, errorMsg.c_str(), L"STC JSON Parsing Error", MB_OK);
+	}
+	catch (const json::exception& e)
+	{
+		std::cerr << "JSON exception: " << e.what() << std::endl;
+
+		// Displaying additional debug information
+		std::wstring errorMsg = L"JSON Parsing failed\nJSON returned is: " + std::wstring(parse_string_json.begin(), parse_string_json.end()) + L"\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
+		MessageBox(NULL, errorMsg.c_str(), L"STC JSON Parsing Error", MB_OK);
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Exception: " << e.what() << std::endl;
+
+		// Displaying additional debug information
+//		std::wstring errorMsg = L"Exception occurred\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
+
+		std::wstring errorMsg = L"Exception occurred\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
+		MessageBox(NULL, errorMsg.c_str(), L"STC Exception", MB_OK);
+	}
+
+	return "";
+}
+
+
+#define INI_FILE_NAME "DataDecryption.ini"
+
+
+inline std::string read_log_file_path()
+{
+	std::string control_variable;
+	INIParser iniParser;
+	if (iniParser.load(INI_FILE_NAME))
+	{
+		control_variable = iniParser.getValue("LOGS", "LOGS_PATH");
+		return control_variable;
+	}
+	else
+	{
+		const char* temp = "logs.txt";
+		return std::string(temp);
+	}
+
+}
+inline std::string read_log_enable()
+{
+	std::string control_variable;
+	INIParser iniParser;
+	if (iniParser.load(INI_FILE_NAME))
+	{
+		control_variable = iniParser.getValue("LOGS", "LOGS_ACTIVE");
+		return control_variable;
+	}
+	else
+	{
+		return "False";
+	}
+
+}
+
+
+std::string read_api_endpoint()
+{
+	static std::string api_endpoint;
+
+	if (api_endpoint.empty())
+	{
+		INIParser iniParser;
+
+		if (iniParser.load(INI_FILE_NAME))
+		{
+			api_endpoint = iniParser.getValue("API_PATH", "API_ENDPOINT");
+		}
+		else
+		{
+			api_endpoint = API_ENDPOINT;  // Replace with a default value
+		}
+	}
+
+	return api_endpoint;
+}
+
+std::string read_api_active()
+{
+	static std::string enc_enable;
+
+	if (enc_enable.empty())
+	{
+		INIParser iniParser;
+
+		if (iniParser.load(INI_FILE_NAME))
+		{
+			enc_enable = iniParser.getValue("API_ACTIVE", "ENCRYPTION");
+		}
+		else
+		{
+			enc_enable = "False";
+		}
+	}
+
+	return enc_enable;
+}
+
+const char* decryptRecord(const char* table_name, const char* record)
+{
+	static std::string enc_enable = read_api_active();
+	static std::string api_endpoint = read_api_endpoint();
+
+	std::string key;
+	std::string temp_str;
+	std::string decrypted_record;
+
+	if (enc_enable == "True")
+	{
+#ifdef DEBUG
+		std::cout << "API :" << api_endpoint << std::endl;
+		std::cout << "Encrypted record is : " << record << std::endl;
+#endif // DEBUG
+
+		const char* url = api_endpoint.c_str();
+
+		// Check if table name changes
+		std::string new_table_name = std::string(table_name);
+
+		if (buffer_table_name_ != new_table_name)
+		{
+			std::cout << "==================> Table name changed" << std::endl;
+			std::cout << "==================> Previous: " << buffer_table_name_ << " New: " << new_table_name << std::endl;
+
+			try
+			{
+				temp_str = api_call_post_method(url, table_name, "");
+
+#ifdef DEBUG
+				std::cout << "==================> api return " << temp_str << std::endl;
+#endif // DEBUG
+
+				if (temp_str != "ERROR")
+				{
+					key = extract_from_json(temp_str);
+
+					encrption_key_ = key;
+					buffer_table_name_ = table_name;
+					std::cout << "==================> API requested for key " << "key received is :" << key << std::endl;
+				}
+			}
+			catch (...)
+			{
+				std::cout << "==================> Error calling API " << std::endl;
+			}
+		}
+		else
+		{
+			// Use the previously obtained key
+			key = encrption_key_;
+		}
+
+		// Perform AES decryption
+		if (!encrption_key_.empty())
+		{
+			unsigned char* temp_key_var = (unsigned char*)encrption_key_.c_str();
+			AESEncDec m_AES(temp_key_var);
+
+			decrypted_record = m_AES.decrypt_string1_ecb(record, encrption_key_);
+
+#ifdef DEBUG
+			std::cout << "" << std::endl;
+			std::cout << "in dll: Decrypted record is : " << decrypted_record << std::endl;
+#endif // DEBUG
+
+			char* result = new char[decrypted_record.length() + 1];
+			strcpy_s(result, decrypted_record.length() + 1, decrypted_record.c_str());
+			return result;
+		}
+		else
+		{
+			MessageBox(NULL, L"API Response failed Function :\"DecryptRecord\" \nAdditional info: Error might be with key length or Json response.", L"STC Key Error", NULL);
+			return "";
+		}
+	}
+	else
+	{
+		// return record when encryption is not enabled
+		return record;
+	}
+
+	return "";
+}
+
+
+// Declare the logger outside the function to reuse it
+std::shared_ptr<spdlog::logger> logger = nullptr;
+std::string log_enable;
+std::string temp_path;
+
+
+# define ROTATING_FILES_QTY 3
+constexpr size_t FILE_SIZE = 1024 * 1024 * 5; //5 MB Size
+
+// Initialize logger during program initialization
+void initializeLogger()
+{
+	try
+	{
+		// Create a rotating logger with a maximum size of 5 MB and 3 rotated files
+		logger = spdlog::rotating_logger_mt("RECORD_LOGGER", temp_path, FILE_SIZE, ROTATING_FILES_QTY);
+	}
+	catch (const spdlog::spdlog_ex& ex) {
+		// Handle initialization error
+		MessageBox(NULL, L"Log init failed Function \"init_logger\" ex.what()", L"STC Logging Error", NULL);
+		std::cout << "Log init failed: " << ex.what() << std::endl;
+	}
+}
+
+void spdLogger(const std::string& message)
+{
+	if (!logger) 
+	{
+		std::cout << "Logger not initialized. Initializing now." << std::endl;
+		initializeLogger(); // Initialize logger if not already initialized
+	}
+	logger->info(message);
+}
+
+
+// Read log settings from INI file
+void readLogSettings() 
+{
+	INIParser iniParser;
+	if (iniParser.load(INI_FILE_NAME)) 
+	{
+		// Read log file path
+		temp_path = iniParser.getValue("LOGS", "LOGS_PATH");
+		
+		// Read logging status
+		log_enable = iniParser.getValue("LOGS", "LOGS_ACTIVE");
+	}
+}
+
+// Write log entry with variadic arguments
+void writeLogEntry(const unsigned char count, const char* first, ...) 
+{
+	// Initialize logging variables if not already initialized
+	if (log_enable.empty()) 
+	{
+		readLogSettings();
+	}
+
+	if (log_enable == "True") 
+	{
+		// Initialize logger if not already initialized
+		if (!logger) 
+		{
+			initializeLogger();
+		}
+
+		va_list args;
+		va_start(args, first);
+		std::stringstream stream;
+		const char* current = first;
+		for (unsigned char iteration = 0; iteration < count; ++iteration) {
+#ifdef DEBUG
+			std::cout << current << std::endl;
+#endif // DEBUG
+			stream << current << ",";
+			current = va_arg(args, const char*);
+		}
+		va_end(args);
+
+#ifdef DEBUG
+		std::cout << stream.str() << std::endl;
+		std::cout << "Log File Path is :" << temp_path << std::endl;
+#endif // DEBUG
+		spdLogger(stream.str());
+	}
+}
