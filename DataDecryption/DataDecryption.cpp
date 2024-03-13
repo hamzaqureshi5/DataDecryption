@@ -97,7 +97,7 @@ std::string api_call_post_method(const char* url, const char* table_name, const 
 	slist1 = curl_slist_append(slist1, "Content-Type: application/json");
 
 	nlohmann::json jsonData;
-	jsonData["accessToken"] = "9AD202FC-FCD1-4E16-A11F-592356F9B7C31";
+//	jsonData["accessToken"] = "9AD202FC-FCD1-4E16-A11F-592356F9B7C31";
 	jsonData["tableName"] = table_name;
 	jsonData["pcId"] = "PC-1";
 	jsonData["macAddress"] = "12345";
