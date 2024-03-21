@@ -1,1 +1,0 @@
-D:\console\piotec\STC-logger-decrypt-v6\DataDecryption\Release\DataDecryption.vcxproj.CopyComplete
