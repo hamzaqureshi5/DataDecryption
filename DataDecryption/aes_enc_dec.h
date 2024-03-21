@@ -62,7 +62,7 @@ public:
 	std::string decrypt_string(const std::string& encrypted_text);
 
 //	std::string decrypt_string1_ecb(const std::string& input);
-	std::string decrypt_string1_ecb(const std::string& input, const std::string& aes_key);
+	std::string decrypt_string_ecb_actual(const std::string& input, const std::string& aes_key);
 
 	int decrypt(unsigned char* ciphertext, int ciphertext_len, const  unsigned char* key, const  unsigned char* iv, unsigned char* plaintext);
 	void hexStringToUnsignedCharArray(const std::string& hexString, unsigned char* ucharArray);

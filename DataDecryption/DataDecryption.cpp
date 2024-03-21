@@ -72,10 +72,9 @@ static std::string encrption_key_;
 
 // Function declarations 
 std::string read_api_endpoint();
-std::string api_call_post_method(const char* url, const char* table_name, const char* iccid_name);
-//std::string extract_from_json(std::string parse_string_json);
-std::string extract_from_json(const std::string& parse_string_json);
-std::string read_api_active();
+unsigned char api_call_post_method(const char* url, const char* table_name, const char* iccid_name, std::string & resultstr);
+unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr);
+int read_api_active();
 
 
 #define API_ENDPOINT "http://127.0.0.1:5555/encryption_key"
@@ -89,7 +88,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out
 	return totalSize;
 }
 
-std::string api_call_post_method(const char* url, const char* table_name, const char* iccid_name)
+unsigned char api_call_post_method(const char* url, const char* table_name, const char* iccid_name, std::string & resultstr)
 {
 	struct curl_slist* slist1;
 
@@ -97,11 +96,11 @@ std::string api_call_post_method(const char* url, const char* table_name, const 
 	slist1 = curl_slist_append(slist1, "Content-Type: application/json");
 
 	nlohmann::json jsonData;
-//	jsonData["accessToken"] = "9AD202FC-FCD1-4E16-A11F-592356F9B7C31";
+	jsonData["accessToken"] = "9AD202FC-FCD1-4E16-A11F-592356F9B7C31";
 	jsonData["tableName"] = table_name;
 	jsonData["pcId"] = "PC-1";
 	jsonData["macAddress"] = "12345";
-
+	
 	// Convert the JSON object to a string
 	std::string jsonString = jsonData.dump();
 	// Initialize cURL
@@ -109,7 +108,7 @@ std::string api_call_post_method(const char* url, const char* table_name, const 
 	if (!curl)
 	{
 		std::cerr << "Error initializing cURL." << std::endl;
-		return "Error";
+		return 0;
 	}
 
 	json m_handle;
@@ -121,6 +120,12 @@ std::string api_call_post_method(const char* url, const char* table_name, const 
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
 
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonString.c_str());
+
+	
+#if 1
+	std::cout << std::endl << "JSON SENT: "<< jsonString << std::endl;
+#endif // 1
+
 
 	// Set the callback function to handle the response
 	std::string responseData;
@@ -134,47 +139,56 @@ std::string api_call_post_method(const char* url, const char* table_name, const 
 	if (res != CURLE_OK)
 	{
 
-		std::wstring errorMessage = L"Server access failed. API POST FUNCTION ERROR: CURLE_OK NOT FOUND!\n";
+		std::wstring errorMessage = L"Server access failed. API POST FUNCTION ERROR: CURLE_OK NOT FOUND! ";
+		errorMessage += std::wstring(curl_easy_strerror(res), curl_easy_strerror(res) + strlen(curl_easy_strerror(res)));
+		std::wcout << "cURL request failed: " << errorMessage << std::endl;
 		MessageBox(NULL, errorMessage.c_str(), L"STC API Server Error", NULL);
-		std::cerr << "cURL request failed: " << curl_easy_strerror(res) << std::endl;
+		return 0;
 	}
 	else
 	{
 		// Get HTTP response code
 		long response_code;
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+		char errorbuffer[CURL_ERROR_SIZE]; // Buffer to store error message
 
-		// Check if the response code is in the 2xx range (indicating success)
-		if (response_code >= 200 && response_code < 300)
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errorbuffer);
+
+		if (response_code >= 200 && response_code < 300) 		// Check if the response code is in the 2xx range (indicating success)
+
 		{
 #ifdef DEBUG
 			std::cout << "Data send is " << jsonData << "\n";
 			std::cout << "Response: " << responseData << std::endl;
 #endif
 			curl_easy_cleanup(curl);
-			return responseData;
+			resultstr = responseData;
+		//	return responseData;
+			return 1;
+
 		}
 		else
 		{
-			std::cerr << "HTTP request failed with response code: " << response_code << std::endl;
-			std::wstring errorMsg = L"Server access failed \"API POST FUNCTION ERROR\" returned RESP: " + std::to_wstring(response_code);
-			MessageBox(NULL, (LPCWSTR)errorMsg.c_str(), L"STC API Response Error", NULL);
-
+			
+			std::wstring errorMessage = L"API POST FUNCTION ERROR:  ";
+			errorMessage += std::wstring(curl_easy_strerror(res), curl_easy_strerror(res) + strlen(curl_easy_strerror(res))  + response_code);
+			std::wcout << "cURL request failed: " << errorMessage << std::endl;
+			MessageBox(NULL, errorMessage.c_str(), L"STC API Error", NULL);
 
 			curl_easy_cleanup(curl);
-			return "ERROR";
+			return 0;
 
 		}
-		return "ERROR";
+		return 0;
 	}
 	// Cleanup cURL
-	return "ERROR";
+	return 0;
 
 }
 
 
 
-std::string extract_from_json(const std::string& parse_string_json)
+unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr)
 {
 	try
 	{
@@ -189,8 +203,10 @@ std::string extract_from_json(const std::string& parse_string_json)
 		// Displaying additional debug information
 		std::cout << "Key: " << key << std::endl;
 #endif // DEBUG
-		return (std::size(key) != 0) ? key : "";
-
+		resultStr = key;
+//		return (std::size(key) != 0) ? key : "";
+		return 1;
+		
 	}
 
 	catch (const json::parse_error& e)
@@ -214,13 +230,11 @@ std::string extract_from_json(const std::string& parse_string_json)
 		std::cerr << "Exception: " << e.what() << std::endl;
 
 		// Displaying additional debug information
-//		std::wstring errorMsg = L"Exception occurred\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
-
 		std::wstring errorMsg = L"Exception occurred\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
 		MessageBox(NULL, errorMsg.c_str(), L"STC Exception", MB_OK);
 	}
 
-	return "";
+	return 0;
 }
 
 
@@ -281,37 +295,31 @@ std::string read_api_endpoint()
 	return api_endpoint;
 }
 
-std::string read_api_active()
+
+int read_api_active()
 {
-	static std::string enc_enable;
+	std::string enc_enable = "0"; // Initialize to a default value
 
-	if (enc_enable.empty())
+	INIParser iniParser;
+
+	if (iniParser.load(INI_FILE_NAME))
 	{
-		INIParser iniParser;
-
-		if (iniParser.load(INI_FILE_NAME))
-		{
-			enc_enable = iniParser.getValue("API_ACTIVE", "ENCRYPTION");
-		}
-		else
-		{
-			enc_enable = "False";
-		}
+		enc_enable = iniParser.getValue("API_ACTIVE", "ENCRYPTION");
 	}
 
-	return enc_enable;
+	return atoi(enc_enable.c_str());
 }
 
 const char* decryptRecord(const char* table_name, const char* record)
 {
-	static std::string enc_enable = read_api_active();
+	static int enc_enable = read_api_active();
 	static std::string api_endpoint = read_api_endpoint();
-
 	std::string key;
-	std::string temp_str;
+//	unsigned char temp_str;
 	std::string decrypted_record;
+	unsigned char extractor_success;
 
-	if (enc_enable == "True")
+	if (enc_enable)
 	{
 #ifdef DEBUG
 		std::cout << "API :" << api_endpoint << std::endl;
@@ -330,15 +338,15 @@ const char* decryptRecord(const char* table_name, const char* record)
 
 			try
 			{
-				temp_str = api_call_post_method(url, table_name, "");
+				std::string apiResp;
 
 #ifdef DEBUG
 				std::cout << "==================> api return " << temp_str << std::endl;
 #endif // DEBUG
-
-				if (temp_str != "ERROR")
+				if (api_call_post_method(url, table_name, "", apiResp))
 				{
-					key = extract_from_json(temp_str);
+
+					extractor_success = extract_from_json(apiResp, key);
 
 					encrption_key_ = key;
 					buffer_table_name_ = table_name;
@@ -357,12 +365,12 @@ const char* decryptRecord(const char* table_name, const char* record)
 		}
 
 		// Perform AES decryption
-		if (!encrption_key_.empty())
+		if (extractor_success)
 		{
 			unsigned char* temp_key_var = (unsigned char*)encrption_key_.c_str();
 			AESEncDec m_AES(temp_key_var);
 
-			decrypted_record = m_AES.decrypt_string1_ecb(record, encrption_key_);
+			decrypted_record = m_AES.decrypt_string_ecb_actual(record, encrption_key_);
 
 #ifdef DEBUG
 			std::cout << "" << std::endl;
@@ -373,11 +381,11 @@ const char* decryptRecord(const char* table_name, const char* record)
 			strcpy_s(result, decrypted_record.length() + 1, decrypted_record.c_str());
 			return result;
 		}
-		else
-		{
-			MessageBox(NULL, L"API Response failed Function :\"DecryptRecord\" \nAdditional info: Error might be with key length or Json response.", L"STC Key Error", NULL);
-			return "";
-		}
+		//else
+		//{
+		//	MessageBox(NULL, L"API Response failed Function :\"DecryptRecord\" \nAdditional info: Error might be with key length or Json response.", L"STC Key Error", NULL);
+		//	return "";
+		//}
 	}
 	else
 	{
@@ -391,7 +399,7 @@ const char* decryptRecord(const char* table_name, const char* record)
 
 // Declare the logger outside the function to reuse it
 std::shared_ptr<spdlog::logger> logger = nullptr;
-std::string log_enable;
+//unsigned char log_enable;
 std::string temp_path;
 
 
@@ -425,29 +433,44 @@ void spdLogger(const std::string& message)
 
 
 // Read log settings from INI file
-void readLogSettings() 
+int readLogEnable()
+{
+	unsigned char log_enable;
+	INIParser iniParser;
+	if (iniParser.load(INI_FILE_NAME))
+	{
+		// Read logging status
+		log_enable = atoi(iniParser.getValue("LOGS", "LOGS_ACTIVE").c_str());
+		return log_enable;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+// Read log settings from INI file
+void readLogPath()
 {
 	INIParser iniParser;
-	if (iniParser.load(INI_FILE_NAME)) 
+	if (iniParser.load(INI_FILE_NAME))
 	{
 		// Read log file path
 		temp_path = iniParser.getValue("LOGS", "LOGS_PATH");
-		
-		// Read logging status
-		log_enable = iniParser.getValue("LOGS", "LOGS_ACTIVE");
 	}
 }
 
 // Write log entry with variadic arguments
 void writeLogEntry(const unsigned char count, const char* first, ...) 
 {
+	
 	// Initialize logging variables if not already initialized
-	if (log_enable.empty()) 
+	if (readLogEnable())
 	{
-		readLogSettings();
+		readLogPath();
 	}
 
-	if (log_enable == "True") 
+	if (readLogEnable()) 
 	{
 		// Initialize logger if not already initialized
 		if (!logger) 

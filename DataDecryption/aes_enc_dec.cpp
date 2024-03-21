@@ -207,7 +207,7 @@ int AESEncDec::decrypt(unsigned char* ciphertext, int ciphertext_len, const  uns
 }
 
 
-std::string AESEncDec::decrypt_string1_ecb(const std::string& input, const std::string& aes_key )
+std::string AESEncDec::decrypt_string_ecb_actual(const std::string& input, const std::string& aes_key )
 {   
 	
 	unsigned char finalKey[16] = { 0 };
