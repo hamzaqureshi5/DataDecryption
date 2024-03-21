@@ -32,32 +32,30 @@ WARININGS
 #include "pch.h"
 #include <limits.h>
 #include "DataDecryption.h"
-#include "string"
+//#include <string>
 #include "framework.h"
 #include <iostream>
 #include <curl/curl.h>
 #include <conio.h>
 #include <nlohmann/json.hpp>
-#include <utility>
-#include <fstream>
-#include <codecvt>
+//#include <utility>
+//#include <fstream>
+//#include <codecvt>
 #include <cstdarg>
+//#include <sstream>
 #include "aes_enc_dec.h"
 #include "config_parser.h"
-#include <iostream>
-#include <sstream>
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
-#include <fstream>
-#include<windows.h>
-//#include "AESEncDec.h"  // Assuming you have a header file for AES encryption/decryption
+//#include <fstream>
+#include <windows.h>
 
 #define NEW_LINE "\n"
+#undef CMD_LINE
 
 
 using json = nlohmann::json;
-
 
 
 // DLL internal state variables:
@@ -122,9 +120,9 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonString.c_str());
 
 	
-#if 1
+#if DEBUG
 	std::cout << std::endl << "JSON SENT: "<< jsonString << std::endl;
-#endif // 1
+#endif
 
 
 	// Set the callback function to handle the response
@@ -141,8 +139,14 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 
 		std::wstring errorMessage = L"Server access failed. API POST FUNCTION ERROR: CURLE_OK NOT FOUND! ";
 		errorMessage += std::wstring(curl_easy_strerror(res), curl_easy_strerror(res) + strlen(curl_easy_strerror(res)));
+
+
+#ifdef CMD_LINE
 		std::wcout << "cURL request failed: " << errorMessage << std::endl;
+#else
 		MessageBox(NULL, errorMessage.c_str(), L"STC API Server Error", NULL);
+#endif
+
 		return 0;
 	}
 	else
@@ -172,8 +176,12 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 			
 			std::wstring errorMessage = L"API POST FUNCTION ERROR:  ";
 			errorMessage += std::wstring(curl_easy_strerror(res), curl_easy_strerror(res) + strlen(curl_easy_strerror(res))  + response_code);
+
+#ifdef CMD_LINE
 			std::wcout << "cURL request failed: " << errorMessage << std::endl;
+#else
 			MessageBox(NULL, errorMessage.c_str(), L"STC API Error", NULL);
+#endif
 
 			curl_easy_cleanup(curl);
 			return 0;
@@ -181,7 +189,6 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 		}
 		return 0;
 	}
-	// Cleanup cURL
 	return 0;
 
 }
@@ -333,8 +340,10 @@ const char* decryptRecord(const char* table_name, const char* record)
 
 		if (buffer_table_name_ != new_table_name)
 		{
+#ifdef DEBUG
 			std::cout << "==================> Table name changed" << std::endl;
 			std::cout << "==================> Previous: " << buffer_table_name_ << " New: " << new_table_name << std::endl;
+#endif
 
 			try
 			{
@@ -350,11 +359,16 @@ const char* decryptRecord(const char* table_name, const char* record)
 
 					encrption_key_ = key;
 					buffer_table_name_ = table_name;
+#if DEBUG
 					std::cout << "==================> API requested for key " << "key received is :" << key << std::endl;
+
+#endif // DEBUG
+
 				}
 			}
 			catch (...)
 			{
+
 				std::cout << "==================> Error calling API " << std::endl;
 			}
 		}
@@ -365,7 +379,7 @@ const char* decryptRecord(const char* table_name, const char* record)
 		}
 
 		// Perform AES decryption
-		if (extractor_success)
+		if (extractor_success==1)
 		{
 			unsigned char* temp_key_var = (unsigned char*)encrption_key_.c_str();
 			AESEncDec m_AES(temp_key_var);
@@ -414,7 +428,8 @@ void initializeLogger()
 		// Create a rotating logger with a maximum size of 5 MB and 3 rotated files
 		logger = spdlog::rotating_logger_mt("RECORD_LOGGER", temp_path, FILE_SIZE, ROTATING_FILES_QTY);
 	}
-	catch (const spdlog::spdlog_ex& ex) {
+	catch (const spdlog::spdlog_ex& ex) 
+	{
 		// Handle initialization error
 		MessageBox(NULL, L"Log init failed Function \"init_logger\" ex.what()", L"STC Logging Error", NULL);
 		std::cout << "Log init failed: " << ex.what() << std::endl;
@@ -425,7 +440,7 @@ void spdLogger(const std::string& message)
 {
 	if (!logger) 
 	{
-		std::cout << "Logger not initialized. Initializing now." << std::endl;
+		std::cout << "Logger not initialized. Initializing now..." << std::endl;
 		initializeLogger(); // Initialize logger if not already initialized
 	}
 	logger->info(message);
