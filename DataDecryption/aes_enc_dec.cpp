@@ -27,15 +27,15 @@ WARININGS
 
 #pragma once
 
-#include <fstream>
+//#include <fstream>
 #include <iostream>
 #include <string>
-#include <cstring>
+//#include <cstring>
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
-#include <sstream>
+//#include <sstream>
 #include "pch.h"
 #include "aes_enc_dec.h"
 #include <iomanip>
@@ -107,58 +107,56 @@ std::string AESEncDec::unsignedCharArrayToHexString(const unsigned char* ucharAr
 	return ss.str();
 }
 
-std::string AESEncDec::encrypt_string(const std::string& plaintext)
-{
-	// initialize encryption buffers
-	unsigned char ciphertext[BLOCKSIZE + BLOCKSIZE]; // extra space for padding
-
-	// initialize encryption context
-	EVP_CIPHER_CTX* ctx;
-	if (!(ctx = EVP_CIPHER_CTX_new()))
-	{
-		handleErrors();
-	}
-
-	// reinitialize iv to avoid reuse
-	if (!RAND_bytes(iv, BLOCKSIZE))
-	{
-		fprintf(stderr, "Failed to initialize IV");
-		return "";
-	}
-
-	// set cipher/key/iv
-	if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
-	{
-		handleErrors();
-	}
-
-	// for keeping track of result length
-	int len;
-	int cipherlen = 0;
-
-	// encrypt the plaintext string
-	if (1 != EVP_EncryptUpdate(ctx, ciphertext, &len, (const unsigned char*)plaintext.c_str(), plaintext.length()))
-		handleErrors();
-
-	cipherlen += len;
-
-	// finalize encryption
-	if (1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len))
-		handleErrors();
-
-	cipherlen += len;
-
-	// cleanup
-	EVP_CIPHER_CTX_free(ctx);
-
-	// return ciphertext as a string
-	return std::string(reinterpret_cast<char*>(ciphertext), cipherlen);
-}
+//std::string AESEncDec::encrypt_string(const std::string& plaintext)
+//{
+//	// initialize encryption buffers
+//	unsigned char ciphertext[BLOCKSIZE + BLOCKSIZE]; // extra space for padding
+//
+//	// initialize encryption context
+//	EVP_CIPHER_CTX* ctx;
+//	if (!(ctx = EVP_CIPHER_CTX_new()))
+//	{
+//		handleErrors();
+//	}
+//
+//	// reinitialize iv to avoid reuse
+//	if (!RAND_bytes(iv, BLOCKSIZE))
+//	{
+//		fprintf(stderr, "Failed to initialize IV");
+//		return "";
+//	}
+//
+//	// set cipher/key/iv
+//	if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+//	{
+//		handleErrors();
+//	}
+//
+//	// for keeping track of result length
+//	int len;
+//	int cipherlen = 0;
+//
+//	// encrypt the plaintext string
+//	if (1 != EVP_EncryptUpdate(ctx, ciphertext, &len, (const unsigned char*)plaintext.c_str(), plaintext.length()))
+//		handleErrors();
+//
+//	cipherlen += len;
+//
+//	// finalize encryption
+//	if (1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len))
+//		handleErrors();
+//
+//	cipherlen += len;
+//
+//	// cleanup
+//	EVP_CIPHER_CTX_free(ctx);
+//
+//	// return ciphertext as a string
+//	return std::string(reinterpret_cast<char*>(ciphertext), cipherlen);
+//}
 
 int AESEncDec::decrypt(unsigned char* ciphertext, int ciphertext_len, const  unsigned char* key, const  unsigned char* iv, unsigned char* plaintext)
 {
-
-
 
 	EVP_CIPHER_CTX* ctx;
 
@@ -169,7 +167,6 @@ int AESEncDec::decrypt(unsigned char* ciphertext, int ciphertext_len, const  uns
 	/* Create and initialise the context */
 	if (!(ctx = EVP_CIPHER_CTX_new()))
 		handleErrors();
-
 
 
 	/*
@@ -207,7 +204,7 @@ int AESEncDec::decrypt(unsigned char* ciphertext, int ciphertext_len, const  uns
 }
 
 
-std::string AESEncDec::decrypt_string1_ecb(const std::string& input, const std::string& aes_key )
+std::string AESEncDec::decrypt_string_ecb_actual(const std::string& input, const std::string& aes_key )
 {   
 	
 	unsigned char finalKey[16] = { 0 };
@@ -223,11 +220,17 @@ std::string AESEncDec::decrypt_string1_ecb(const std::string& input, const std::
 		i++;
 	}
 
+#if DEBUG
+
 	for (size_t i = 0; i < 15; i++)
 	{
 		std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(finalKey[i]) << "|";
-//		std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byteArray[i]) << " A ";
+		//		std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byteArray[i]) << " A ";
 	}
+
+#endif // DEBUG
+
+
 
 	unsigned char a[1024];
 
@@ -236,12 +239,17 @@ std::string AESEncDec::decrypt_string1_ecb(const std::string& input, const std::
 
 	unsigned char decryptedText[1024];
 
-	std::cout << "input length is " << input.length() << std::endl;
 	int decrypted_len = decrypt(a, input.length() / 2, finalKey, iv, decryptedText);
 
 	//int decrypted_len = decrypt(a, input.length() / 2, key, iv, decryptedText);
+
+#if DEBUG
+	std::cout << "input length is " << input.length() << std::endl;
 	printf("\n");
 	printf("Decrypted Text: %.*s\n", decrypted_len, decryptedText);
+
+#endif // DEBUG
+
 
 	std::string plainString(reinterpret_cast<char*>(decryptedText), decrypted_len);
 	return plainString;

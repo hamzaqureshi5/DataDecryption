@@ -22,7 +22,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{ef3a7ab2-ee7f-43b4-b4ee-453965b0d436}</ProjectGuid>
-    <RootNamespace>STC</RootNamespace>
+    <RootNamespace>DataDecryption</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>DataDecryption</ProjectName>
   </PropertyGroup>
