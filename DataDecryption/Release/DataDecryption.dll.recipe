@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\console\piotec\STC-logger-decrypt-v6\Release\DataDecryption.dll</FullPath>
+      <FullPath>D:\console\piotec\DataDecryption-v6\Release\DataDecryption.dll</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

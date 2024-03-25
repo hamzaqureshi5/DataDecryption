@@ -1,0 +1,11 @@
+﻿  pch.cpp
+  dllmain.cpp
+  config_parser.cpp
+  DataDecryption.cpp
+  aes_enc_dec.cpp
+D:\console\piotec\DataDecryption-v6\DataDecryption\aes_enc_dec.cpp(242,48): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
+     Creating library D:\console\piotec\DataDecryption-v6\x64\Debug\DataDecryption.lib and object D:\console\piotec\DataDecryption-v6\x64\Debug\DataDecryption.exp
+  DataDecryption.vcxproj -> D:\console\piotec\DataDecryption-v6\x64\Debug\DataDecryption.dll
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

@@ -75,7 +75,7 @@ unsigned char extract_from_json(const std::string& parse_string_json, std::strin
 int read_api_active();
 
 
-#define API_ENDPOINT "http://127.0.0.1:5555/encryption_key"
+//#define API_ENDPOINT "http://127.0.0.1:5555/encryption_key"
 
 
 // Callback function to handle the response
@@ -195,10 +195,10 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 
 
 
-unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr)
+inline unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr)
 {
-	try
-	{
+//	try
+//	{
 		// Parse the JSON string
 		json responseData = json::parse(parse_string_json);
 
@@ -214,74 +214,75 @@ unsigned char extract_from_json(const std::string& parse_string_json, std::strin
 //		return (std::size(key) != 0) ? key : "";
 		return 1;
 		
-	}
+//	}
 
-	catch (const json::parse_error& e)
-	{
-		std::cerr << "JSON parsing error: " << e.what() << std::endl;
+	//catch (const json::parse_error& e)
+	//{
+	//	std::cerr << "JSON parsing error: " << e.what() << std::endl;
 
-		// Convert the JSON string to a wide string for display in MessageBox
-		std::wstring errorMsg = L"JSON Parsing failed\nJSON returned is: " + std::wstring(parse_string_json.begin(), parse_string_json.end());
-		MessageBox(NULL, errorMsg.c_str(), L"STC JSON Parsing Error", MB_OK);
-	}
-	catch (const json::exception& e)
-	{
-		std::cerr << "JSON exception: " << e.what() << std::endl;
+	//	// Convert the JSON string to a wide string for display in MessageBox
+	//	std::wstring errorMsg = L"JSON Parsing failed\nJSON returned is: " + std::wstring(parse_string_json.begin(), parse_string_json.end());
+	//	MessageBox(NULL, errorMsg.c_str(), L"STC JSON Parsing Error", MB_OK);
+	//}
+	//catch (const json::exception& e)
+	//{
+	//	std::cerr << "JSON exception: " << e.what() << std::endl;
 
-		// Displaying additional debug information
-		std::wstring errorMsg = L"JSON Parsing failed\nJSON returned is: " + std::wstring(parse_string_json.begin(), parse_string_json.end()) + L"\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
-		MessageBox(NULL, errorMsg.c_str(), L"STC JSON Parsing Error", MB_OK);
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << std::endl;
+	//	// Displaying additional debug information
+	//	std::wstring errorMsg = L"JSON Parsing failed\nJSON returned is: " + std::wstring(parse_string_json.begin(), parse_string_json.end()) + L"\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
+	//	MessageBox(NULL, errorMsg.c_str(), L"STC JSON Parsing Error", MB_OK);
+	//}
+	//catch (const std::exception& e)
+	//{
+	//	std::cerr << "Exception: " << e.what() << std::endl;
 
-		// Displaying additional debug information
-		std::wstring errorMsg = L"Exception occurred\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
-		MessageBox(NULL, errorMsg.c_str(), L"STC Exception", MB_OK);
-	}
+	//	// Displaying additional debug information
+	//	std::wstring errorMsg = L"Exception occurred\nException: " + std::wstring(e.what(), e.what() + strlen(e.what()));
+	//	MessageBox(NULL, errorMsg.c_str(), L"STC Exception", MB_OK);
+	//}
 
-	return 0;
+	//return 0;
 }
 
 
 #define INI_FILE_NAME "DataDecryption.ini"
 
 
-inline std::string read_log_file_path()
-{
-	std::string control_variable;
-	INIParser iniParser;
-	if (iniParser.load(INI_FILE_NAME))
-	{
-		control_variable = iniParser.getValue("LOGS", "LOGS_PATH");
-		return control_variable;
-	}
-	else
-	{
-		const char* temp = "logs.txt";
-		return std::string(temp);
-	}
+//inline std::string read_log_file_path()
+//{
+//	std::string control_variable;
+//	INIParser iniParser;
+//	if (iniParser.load(INI_FILE_NAME))
+//	{
+//		control_variable = iniParser.getValue("LOGS", "LOGS_PATH");
+//		return control_variable;
+//	}
+//	else
+//	{
+//		const char* temp = "logs.txt";
+//		return std::string(temp);
+//	}
+//
+//}
 
-}
-inline std::string read_log_enable()
-{
-	std::string control_variable;
-	INIParser iniParser;
-	if (iniParser.load(INI_FILE_NAME))
-	{
-		control_variable = iniParser.getValue("LOGS", "LOGS_ACTIVE");
-		return control_variable;
-	}
-	else
-	{
-		return "False";
-	}
+//inline std::string read_log_enable()
+//{
+//	std::string control_variable;
+//	INIParser iniParser;
+//	if (iniParser.load(INI_FILE_NAME))
+//	{
+//		control_variable = iniParser.getValue("LOGS", "LOGS_ACTIVE");
+//		return control_variable;
+//	}
+//	else
+//	{
+//		return "False";
+//	}
+//
+//}
 
-}
 
-
-std::string read_api_endpoint()
+inline std::string read_api_endpoint()
 {
 	static std::string api_endpoint;
 
@@ -295,7 +296,8 @@ std::string read_api_endpoint()
 		}
 		else
 		{
-			api_endpoint = API_ENDPOINT;  // Replace with a default value
+//			MessageBox(NULL, L"API END POINT NOT MENTIONED ", L"STC INI Error", NULL);
+			api_endpoint = "";  // Replace with a default value
 		}
 	}
 
@@ -303,7 +305,7 @@ std::string read_api_endpoint()
 }
 
 
-int read_api_active()
+inline int read_api_active()
 {
 	std::string enc_enable = "0"; // Initialize to a default value
 
@@ -322,9 +324,8 @@ const char* decryptRecord(const char* table_name, const char* record)
 	static int enc_enable = read_api_active();
 	static std::string api_endpoint = read_api_endpoint();
 	std::string key;
-//	unsigned char temp_str;
 	std::string decrypted_record;
-	unsigned char extractor_success;
+	unsigned int extractor_success;
 
 	if (enc_enable)
 	{
@@ -497,7 +498,8 @@ void writeLogEntry(const unsigned char count, const char* first, ...)
 		va_start(args, first);
 		std::stringstream stream;
 		const char* current = first;
-		for (unsigned char iteration = 0; iteration < count; ++iteration) {
+		for (unsigned char iteration = 0; iteration < count; ++iteration) 
+		{
 #ifdef DEBUG
 			std::cout << current << std::endl;
 #endif // DEBUG
