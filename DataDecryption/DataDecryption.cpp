@@ -25,57 +25,55 @@ WARININGS
 //
 
 //#define DEBUG
-#undef DEBUG
+# undef DEBUG
+# undef CMD_LINE
 
 
 
 #include "pch.h"
-#include <limits.h>
-#include "DataDecryption.h"
-//#include <string>
-#include "framework.h"
-#include <iostream>
-#include <curl/curl.h>
 #include <conio.h>
-#include <nlohmann/json.hpp>
-//#include <utility>
-//#include <fstream>
-//#include <codecvt>
 #include <cstdarg>
-//#include <sstream>
+#include <limits.h>
+#include <iostream>
+#include <windows.h>
+#include <curl/curl.h>
+#include <nlohmann/json.hpp>
 #include "aes_enc_dec.h"
 #include "config_parser.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
-//#include <fstream>
-#include <windows.h>
+#include "DataDecryption.h"
+#include "framework.h"
 
-#define NEW_LINE "\n"
-#undef CMD_LINE
 
+# define NEW_LINE "\n"
+# define ROTATING_FILES_QTY 3
+
+constexpr size_t FILE_SIZE = 1024 * 1024 * 5; //5 MB Size
 
 using json = nlohmann::json;
 
 
 // DLL internal state variables:
-static unsigned long long previous_;  // Previous value, if any
-static unsigned long long current_;   // Current sequence value
-static unsigned index_;               // Current seq. position
-
 static std::string buffer_table_name_;
-//static std::string previous_table_name_;
 static std::string encrption_key_;
+
+std::shared_ptr<spdlog::logger> logger = nullptr; // Declare the logger outside the function to reuse it
+std::string temp_path;
+
 
 
 // Function declarations 
-std::string read_api_endpoint();
+int readLogEnable();
+void readLogPath();
+void spdLogger(const std::string& message);
+void initializeLogger();
+
+inline std::string read_api_endpoint();
+inline int read_api_active();
+inline unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr);
 unsigned char api_call_post_method(const char* url, const char* table_name, const char* iccid_name, std::string & resultstr);
-unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr);
-int read_api_active();
-
-
-//#define API_ENDPOINT "http://127.0.0.1:5555/encryption_key"
 
 
 // Callback function to handle the response
@@ -248,40 +246,6 @@ inline unsigned char extract_from_json(const std::string& parse_string_json, std
 #define INI_FILE_NAME "DataDecryption.ini"
 
 
-//inline std::string read_log_file_path()
-//{
-//	std::string control_variable;
-//	INIParser iniParser;
-//	if (iniParser.load(INI_FILE_NAME))
-//	{
-//		control_variable = iniParser.getValue("LOGS", "LOGS_PATH");
-//		return control_variable;
-//	}
-//	else
-//	{
-//		const char* temp = "logs.txt";
-//		return std::string(temp);
-//	}
-//
-//}
-
-//inline std::string read_log_enable()
-//{
-//	std::string control_variable;
-//	INIParser iniParser;
-//	if (iniParser.load(INI_FILE_NAME))
-//	{
-//		control_variable = iniParser.getValue("LOGS", "LOGS_ACTIVE");
-//		return control_variable;
-//	}
-//	else
-//	{
-//		return "False";
-//	}
-//
-//}
-
-
 inline std::string read_api_endpoint()
 {
 	static std::string api_endpoint;
@@ -412,14 +376,6 @@ const char* decryptRecord(const char* table_name, const char* record)
 }
 
 
-// Declare the logger outside the function to reuse it
-std::shared_ptr<spdlog::logger> logger = nullptr;
-//unsigned char log_enable;
-std::string temp_path;
-
-
-# define ROTATING_FILES_QTY 3
-constexpr size_t FILE_SIZE = 1024 * 1024 * 5; //5 MB Size
 
 // Initialize logger during program initialization
 void initializeLogger()
@@ -446,7 +402,6 @@ void spdLogger(const std::string& message)
 	}
 	logger->info(message);
 }
-
 
 // Read log settings from INI file
 int readLogEnable()
