@@ -252,7 +252,7 @@ inline std::string read_api_endpoint()
 
 	if (api_endpoint.empty())
 	{
-		INIParser iniParser;
+		configParser iniParser;
 
 		if (iniParser.load(INI_FILE_NAME))
 		{
@@ -273,7 +273,7 @@ inline int read_api_active()
 {
 	std::string enc_enable = "0"; // Initialize to a default value
 
-	INIParser iniParser;
+	configParser iniParser;
 
 	if (iniParser.load(INI_FILE_NAME))
 	{
@@ -407,7 +407,7 @@ void spdLogger(const std::string& message)
 int readLogEnable()
 {
 	unsigned char log_enable;
-	INIParser iniParser;
+	configParser iniParser;
 	if (iniParser.load(INI_FILE_NAME))
 	{
 		// Read logging status
@@ -423,7 +423,7 @@ int readLogEnable()
 // Read log settings from INI file
 void readLogPath()
 {
-	INIParser iniParser;
+	configParser iniParser;
 	if (iniParser.load(INI_FILE_NAME))
 	{
 		// Read log file path

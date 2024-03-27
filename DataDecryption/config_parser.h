@@ -30,7 +30,7 @@ WARININGS
 #include "DataDecryption.h"
 #include "pch.h"
 
-class INIParser
+class configParser
 {
 public:
 	bool load(const std::string& filename);

@@ -27,7 +27,7 @@ WARININGS
 //
 
 
-bool INIParser::load(const std::string& filename)
+bool configParser::load(const std::string& filename)
 {
 	std::ifstream file(filename);
 	if (!file.is_open())
@@ -48,7 +48,7 @@ bool INIParser::load(const std::string& filename)
 	return true;
 }
 
-std::string INIParser::getValue(const std::string& section, const std::string& key) const
+std::string configParser::getValue(const std::string& section, const std::string& key) const
 {
 	auto sectionIter = iniData.find(section);
 	if (sectionIter != iniData.end()) 
@@ -64,7 +64,7 @@ std::string INIParser::getValue(const std::string& section, const std::string& k
 	return ""; // Return empty string if the section or key is not found
 }
 
-void INIParser::parseLine(const std::string& line, std::string& currentSection)
+void configParser::parseLine(const std::string& line, std::string& currentSection)
 {
 	std::istringstream iss(line);
 	std::string token;
