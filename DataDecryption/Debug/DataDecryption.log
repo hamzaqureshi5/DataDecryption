@@ -1,10 +1,1 @@
-﻿  pch.cpp
-  dllmain.cpp
-  config_parser.cpp
-  DataDecryption.cpp
-  aes_enc_dec.cpp
-  Generating Code...
-     Creating library D:\console\piotec\new\DataDecryption-v6\Debug\DataDecryption.lib and object D:\console\piotec\new\DataDecryption-v6\Debug\DataDecryption.exp
-  DataDecryption.vcxproj -> D:\console\piotec\new\DataDecryption-v6\Debug\DataDecryption.dll
-  'pwsh.exe' is not recognized as an internal or external command,
-  operable program or batch file.
+﻿
