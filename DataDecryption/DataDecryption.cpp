@@ -73,7 +73,7 @@ void initializeLogger();
 inline std::string read_api_endpoint();
 inline int read_api_active();
 inline unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr);
-unsigned char api_call_post_method(const char* url, const char* table_name, const char* iccid_name, std::string & resultstr);
+inline unsigned char api_call_post_method(const char* url, const char* table_name, const char* iccid_name, std::string & resultstr);
 
 
 // Callback function to handle the response
@@ -118,7 +118,7 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonString.c_str());
 
 	
-#if DEBUG
+#ifdef DEBUG
 	std::cout << std::endl << "JSON SENT: "<< jsonString << std::endl;
 #endif
 
@@ -191,8 +191,6 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 
 }
 
-
-
 inline unsigned char extract_from_json(const std::string& parse_string_json, std::string& resultStr)
 {
 //	try
@@ -201,6 +199,7 @@ inline unsigned char extract_from_json(const std::string& parse_string_json, std
 		json responseData = json::parse(parse_string_json);
 
 		// Extract values
+		std::string err = responseData.value("hasError", ""); // Using value() 
 		std::string key = responseData.value("aesKey", ""); // Using value() to avoid exception if key is not found
 		std::cout << "RESP: " << responseData << std::endl;
 
@@ -315,7 +314,7 @@ const char* decryptRecord(const char* table_name, const char* record)
 				std::string apiResp;
 
 #ifdef DEBUG
-				std::cout << "==================> api return " << temp_str << std::endl;
+//				std::cout << "==================> api return " << temp_str << std::endl;
 #endif // DEBUG
 				if (api_call_post_method(url, table_name, "", apiResp))
 				{
@@ -324,7 +323,7 @@ const char* decryptRecord(const char* table_name, const char* record)
 
 					encrption_key_ = key;
 					buffer_table_name_ = table_name;
-#if DEBUG
+#ifdef DEBUG
 					std::cout << "==================> API requested for key " << "key received is :" << key << std::endl;
 
 #endif // DEBUG

@@ -1,1 +1,13 @@
-﻿
+﻿  pch.cpp
+  dllmain.cpp
+  config_parser.cpp
+  DataDecryption.cpp
+  aes_enc_dec.cpp
+     Creating library D:\console\piotec\DataDecryption-v6\Release\DataDecryption.lib and object D:\console\piotec\DataDecryption-v6\Release\DataDecryption.exp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 4942 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  DataDecryption.vcxproj -> D:\console\piotec\DataDecryption-v6\Release\DataDecryption.dll
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
