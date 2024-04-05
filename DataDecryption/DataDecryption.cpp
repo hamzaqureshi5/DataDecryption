@@ -99,8 +99,14 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 	
 	// Convert the JSON object to a string
 	std::string jsonString = jsonData.dump();
+
 	// Initialize cURL
+	curl_global_init(CURL_GLOBAL_DEFAULT);
 	CURL* curl = curl_easy_init();
+
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // Don't verify the peer's SSL certificate
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); // Don't verify the certificate's name against host
+
 	if (!curl)
 	{
 		std::cerr << "Error initializing cURL." << std::endl;
@@ -182,6 +188,7 @@ unsigned char api_call_post_method(const char* url, const char* table_name, cons
 #endif
 
 			curl_easy_cleanup(curl);
+			curl_global_cleanup();
 			return 0;
 
 		}
