@@ -1,0 +1,11 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (DataDecryption.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  pch.cpp
+  dllmain.cpp
+  config_parser.cpp
+  DataDecryption.cpp
+  aes_enc_dec.cpp
+  Generating Code...
+     Creating library C:\Users\hamza.qureshi\Desktop\git\DataDecryption-v6\Debug\DataDecryption_7.lib and object C:\Users\hamza.qureshi\Desktop\git\DataDecryption-v6\Debug\DataDecryption_7.exp
+  DataDecryption.vcxproj -> C:\Users\hamza.qureshi\Desktop\git\DataDecryption-v6\Debug\DataDecryption_7.dll
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

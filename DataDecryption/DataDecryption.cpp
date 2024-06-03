@@ -32,23 +32,17 @@ WARININGS
 #include "pch.h"
 #include <limits.h>
 #include "DataDecryption.h"
-//#include <string>
 #include "framework.h"
 #include <iostream>
 #include <curl/curl.h>
 #include <conio.h>
 #include <nlohmann/json.hpp>
-//#include <utility>
-//#include <fstream>
-//#include <codecvt>
 #include <cstdarg>
-//#include <sstream>
 #include "aes_enc_dec.h"
 #include "config_parser.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
-//#include <fstream>
 #include <windows.h>
 
 #define NEW_LINE "\n"
