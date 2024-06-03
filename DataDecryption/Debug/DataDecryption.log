@@ -1,11 +1,21 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (DataDecryption.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (DataDecryption_7.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   pch.cpp
   dllmain.cpp
   config_parser.cpp
   DataDecryption.cpp
   aes_enc_dec.cpp
   Generating Code...
-     Creating library C:\Users\hamza.qureshi\Desktop\git\DataDecryption-v6\Debug\DataDecryption_7.lib and object C:\Users\hamza.qureshi\Desktop\git\DataDecryption-v6\Debug\DataDecryption_7.exp
-  DataDecryption.vcxproj -> C:\Users\hamza.qureshi\Desktop\git\DataDecryption-v6\Debug\DataDecryption_7.dll
+     Creating library D:\console\piotec\DataDecryption-v7\Debug\DataDecryption.lib and object D:\console\piotec\DataDecryption-v7\Debug\DataDecryption.exp
+  DataDecryption.vcxproj -> D:\console\piotec\DataDecryption-v7\Debug\DataDecryption.dll
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.
+  Copy DLL to test case directory
+  D:\console\piotec\DataDecryption-v7\Debug\DataDecryption.dll
+  D:\console\piotec\DataDecryption-v7\Debug\DataDecryption.exp
+  D:\console\piotec\DataDecryption-v7\Debug\DataDecryption.lib
+  D:\console\piotec\DataDecryption-v7\Debug\DataDecryption.pdb
+  D:\console\piotec\DataDecryption-v7\Debug\fmtd.dll
+  D:\console\piotec\DataDecryption-v7\Debug\libcrypto-3.dll
+  D:\console\piotec\DataDecryption-v7\Debug\libcurl-d.dll
+  D:\console\piotec\DataDecryption-v7\Debug\zlibd1.dll
+  8 File(s) copied
